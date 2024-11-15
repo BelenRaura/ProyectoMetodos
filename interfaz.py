@@ -91,4 +91,3 @@ boton_simular = tk.Button(ventana, text="Iniciar Simulación", command=iniciar_s
 boton_simular.grid(row=5, column=0, columnspan=2)
 
 ventana.mainloop()
-
