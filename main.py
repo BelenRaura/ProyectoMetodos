@@ -88,7 +88,7 @@ def iniciar_simulacion():
             historial.append((t, aporte, round(capital - ganancia , 2), round(ganancia, 2), round(capital, 2)))
         Interes = float(i_calculado) * n
         # Mostrar la tasa de interés calculada
-        label_resultado.config(text=f"Tasa de interés calculada: {Interes:.6f}")
+        label_resultado.config(text=f"Tasa de interés calculada: {Interes * 100:.6f}")
         # Mostrar el historial en una nueva ventana
         mostrar_historial(historial)
 
