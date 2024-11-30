@@ -107,7 +107,7 @@ def center_window(window):
 def mostrar_historial(historial):  
     # Crear una nueva ventana  
     ventana_historial = tk.Toplevel(root)  
-    ventana_historial.title("Historial de Resultados")  
+    ventana_historial.title("Historial de Resultados")
 
     # Crear la tabla para mostrar los resultados en la nueva ventana  
     tree = ttk.Treeview(ventana_historial, columns=("Periodo", "Aporte", "Capital", "Ganancia", "Total"), show="headings")  
@@ -140,25 +140,26 @@ center_window(root)
 frame_principal = ttk.Frame(root, padding="10")  
 frame_principal.grid(row=0, column=0)  
 
+bold_font = ("Helvetica", 9, "bold") 
+
 # Etiquetas y campos de entrada  
-ttk.Label(frame_principal, text="Valor Inicial (V0):").grid(row=0, column=0, sticky="w", pady=5)  
+ttk.Label(frame_principal, text="Valor Inicial (V0):", font=bold_font).grid(row=0, column=0, sticky="w", pady=5)  
 entry_V0 = ttk.Entry(frame_principal)  
 entry_V0.grid(row=0, column=1, pady=5)  
 
-ttk.Label(frame_principal, text="Aporte Periódico (A):").grid(row=1, column=0, sticky="w", pady=5)  
+ttk.Label(frame_principal, text="Aporte Periódico (A):", font=bold_font).grid(row=1, column=0, sticky="w", pady=5)  
 entry_A = ttk.Entry(frame_principal)  
 entry_A.grid(row=1, column=1, pady=5)  
 
-ttk.Label(frame_principal, text="Número de Periodos (n):").grid(row=2, column=0, sticky="w", pady=5)  
+ttk.Label(frame_principal, text="Número de Periodos (n):", font=bold_font).grid(row=2, column=0, sticky="w", pady=5)  
 entry_n = ttk.Entry(frame_principal)  
 entry_n.grid(row=2, column=1, pady=5)  
 
-ttk.Label(frame_principal, text="Valor Final (Vf):").grid(row=3, column=0, sticky="w", pady=5)  
+ttk.Label(frame_principal, text="Valor Final (Vf):", font=bold_font).grid(row=3, column=0, sticky="w", pady=5)  
 entry_Vf = ttk.Entry(frame_principal)  
 entry_Vf.grid(row=3, column=1, pady=5)  
 
-# ComboBox para seleccionar la frecuencia de los aportes  
-ttk.Label(frame_principal, text="Frecuencia de Aportes:").grid(row=4, column=0, sticky="w", pady=5)  
+ttk.Label(frame_principal, text="Frecuencia de Aportes:", font=bold_font).grid(row=4, column=0, sticky="w", pady=5)  
 combo_frecuencia = ttk.Combobox(frame_principal, values=["Semanal", "Mensual", "Bimestral", "Trimestral"])  
 combo_frecuencia.set("Semanal")  # Valor predeterminado  
 combo_frecuencia.grid(row=4, column=1, pady=5)  
