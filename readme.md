@@ -1,5 +1,10 @@
 # PROYECTO BIMESTRAL - MÉTODOS NUMÉRICOS
 
+# BELEN RAURA
+# ANDRES FERNANDEZ
+# DAVID PUGA
+# KENNET YAR
+
 # Descripción
 Un prestigioso banco lo ha contratado para implementar la calculadora de un programa de ahorro moderno. 
 Este programa consiste de:
