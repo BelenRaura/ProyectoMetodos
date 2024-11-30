@@ -41,6 +41,11 @@ def iniciar_simulacion():
         Vf = float(entry_Vf.get())
         frecuencia = combo_frecuencia.get()
 
+        # Validar que los valores sean positivos
+        if V0 < 0 or A < 0 or n <= 0 or Vf < 0:
+            messagebox.showerror("Error", "Por favor, ingresa valores positivos para todos los campos.")
+            return
+
         # Inicializamos los valores para el método de la secante
         i0 = 0.05  # Valor inicial 1
         i1 = 0.08  # Valor inicial 2
