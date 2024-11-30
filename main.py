@@ -68,7 +68,7 @@ def iniciar_simulacion():
             n = n * 4 / 3  # Convertir de semanas a trimestres
             A = A * 4 / 3  # Convertir aportes semanales a trimestrales
 
-        # Calcular los resultados para cada periodo
+        # Calcular los resultados para cada periódo
         capital = V0  # Capital inicial (se mantiene igual)
         historial = []
         for t in range(1, n + 1):
