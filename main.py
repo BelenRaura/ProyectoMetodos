@@ -115,12 +115,21 @@ def mostrar_historial(historial):
 
     # Crear la tabla para mostrar los resultados en la nueva ventana
     tree = ttk.Treeview(ventana_historial, columns=("Periodo", "Aporte", "Capital", "Ganancia", "Total"), show="headings")
-    tree.heading("Periodo", text="Periodo")
-    tree.heading("Aporte", text="Aporte")
-    tree.heading("Capital", text="Capital")
-    tree.heading("Ganancia", text="Ganancia")
-    tree.heading("Total", text="Total")
+    
+    # Configuración de los encabezados para centrarlos
+    tree.heading("Periodo", text="Periodo", anchor='center')
+    tree.heading("Aporte", text="Aporte", anchor='center')
+    tree.heading("Capital", text="Capital", anchor='center')
+    tree.heading("Ganancia", text="Ganancia", anchor='center')
+    tree.heading("Total", text="Total", anchor='center')
     tree.grid(row=0, column=0, pady=10, padx=10)
+
+    # Configuración de las columnas para centrar los datos
+    tree.column("Periodo", anchor="center", width=100)
+    tree.column("Aporte", anchor="center", width=100)
+    tree.column("Capital", anchor="center", width=100)
+    tree.column("Ganancia", anchor="center", width=100)
+    tree.column("Total", anchor="center", width=100)
 
     # Insertar los resultados en la tabla
     for row in historial:
