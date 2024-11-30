@@ -11,38 +11,52 @@ class AhorroConInteresCompuesto:
         self.historial = []
 
     def calcular_interes_periodico(self):
-        if self.periodo_aporte == "Semanal":
-            return self.tasa_interes_anual / 52
-        elif self.periodo_aporte == "Mensual":
-            return self.tasa_interes_anual / 12
-        elif self.periodo_aporte == "Bimestral":
-            return self.tasa_interes_anual / 6
-        elif self.periodo_aporte == "Trimestral":
-            return self.tasa_interes_anual / 4
-        else:
-            raise ValueError("Período de aporte no válido")
+        periodos = {"Semanal": 52, "Mensual": 12, "Bimestral": 6, "Trimestral": 4}
+        if self.periodo_aporte not in periodos:
+            raise ValueError(f"Período de aporte '{self.periodo_aporte}' no válido.")
+        return self.tasa_interes_anual / periodos[self.periodo_aporte]/100
+
 
     def calcular_historial(self, num_periodos):
-        interes_periodico = self.calcular_interes_periodico() / 100
+        interes_periodico = self.calcular_interes_periodico()
         capital = self.deposito_inicial
+        self.historial = []
 
         for periodo in range(1, num_periodos + 1):
-            ganancia = capital * interes_periodico
-            capital += ganancia + self.aporte_periodico
-            self.historial.append((periodo, round(capital, 2), round(ganancia, 2)))
-
+            if periodo == 1:
+                ganancia = capital * interes_periodico
+                total = capital + ganancia
+                self.historial.append((periodo, round(self.deposito_inicial, 2), round(capital, 2), round(ganancia, 2), round(total, 2)))
+            else:
+                capital += self.aporte_periodico + ganancia
+                ganancia = capital * interes_periodico
+                total = capital + ganancia 
+                self.historial.append((periodo, round(self.aporte_periodico, 2), round(capital, 2), round(ganancia, 2), round(total, 2)))
 def validar_entradas():
     """Verifica que todas las entradas sean válidas antes de proceder."""
     if not entry_deposito.get().strip() or not entry_aporte.get().strip() or not entry_tasa.get().strip() or not entry_periodos.get().strip():
         messagebox.showerror("Error", "Todos los campos son obligatorios.")
         return False
     try:
-        float(entry_deposito.get())
-        float(entry_aporte.get())
-        float(entry_tasa.get())
-        int(entry_periodos.get())
+        deposito_inicial = float(entry_deposito.get())
+        aporte_periodico = float(entry_aporte.get())
+        tasa_interes_anual = float(entry_tasa.get())
+        periodo_aporte = combo_periodo.get().strip()
+        num_periodos = int(entry_periodos.get())
     except ValueError:
         messagebox.showerror("Error", "Por favor, ingrese valores numéricos válidos.")
+        return False
+    if tasa_interes_anual < 0:
+        messagebox.showerror("Error", "La tasa de interés no puede ser negativa.")
+        return False
+    if deposito_inicial < 50:
+        messagebox.showerror("Error", "El depósito inicial debe ser de al menos 50 dólares")
+        return False
+    if aporte_periodico < 5:
+        messagebox.showerror("Error", "Los aportes periódicos deben ser de al menos 5 dólares por cada periodo")
+        return False
+    if num_periodos <= 0:
+        messagebox.showerror("Error", "Número invalido de periodos")
         return False
     if combo_periodo.get() not in ["Semanal", "Mensual", "Bimestral", "Trimestral"]:
         messagebox.showerror("Error", "Seleccione un período de aporte válido.")
@@ -70,23 +84,32 @@ def iniciar_simulacion():
 def mostrar_resultados(historial):
     ventana_resultados = ttk.Toplevel()
     ventana_resultados.title("Resultados de la Simulación")
-    ventana_resultados.geometry("500x400")
+    ventana_resultados.geometry("800x400")
+    ventana_resultados.resizable(False,False)
 
     frame_resultados = ttk.Frame(ventana_resultados, padding=10)
     frame_resultados.pack(fill=BOTH, expand=True)
 
+    style = ttk.Style()
+    style.configure("Treeview.Heading", background="#127FA4", foreground="white", font=("Helvetica", 10, "bold"))
+
     tree = ttk.Treeview(
         frame_resultados,
-        columns=("Periodo", "Capital", "Ganancia"),
+        columns=("Periodo", "Aporte ($)", "Capital ($)", "Ganancia ($)", "Total ($)"),
         show="headings"
     )
+    
     tree.heading("Periodo", text="Periodo")
-    tree.heading("Capital", text="Capital")
-    tree.heading("Ganancia", text="Ganancia")
+    tree.heading("Aporte ($)", text="Aporte ($)")
+    tree.heading("Capital ($)", text="Capital ($)")
+    tree.heading("Ganancia ($)", text="Ganancia ($)")
+    tree.heading("Total ($)", text="Total ($)")
 
     tree.column("Periodo", anchor=CENTER, width=100)
-    tree.column("Capital", anchor=CENTER, width=150)
-    tree.column("Ganancia", anchor=CENTER, width=150)
+    tree.column("Aporte ($)", anchor=CENTER, width=150)
+    tree.column("Capital ($)", anchor=CENTER, width=150)
+    tree.column("Ganancia ($)", anchor=CENTER, width=150)
+    tree.column("Total ($)", anchor=CENTER, width=150)
 
     for fila in historial:
         tree.insert("", END, values=fila)
@@ -118,6 +141,7 @@ def limpiar_campos():
 ventana = ttk.Window(themename="superhero")
 ventana.title("Simulador de Ahorro con Interés Compuesto")
 ventana.geometry("500x400")
+ventana.resizable(False, False)
 
 # Encabezado
 ttk.Label(ventana, text="Simulador de Ahorro", font=("Helvetica", 20, "bold"), bootstyle=PRIMARY).pack(pady=10)
@@ -147,10 +171,7 @@ entry_periodos = ttk.Entry(frame_principal, bootstyle=INFO)
 entry_periodos.grid(row=4, column=1, pady=5)
 
 # Botones
-boton_simular = ttk.Button(frame_principal, text="Iniciar Simulación", command=iniciar_simulacion, bootstyle=SUCCESS)
-boton_simular.grid(row=5, column=0, pady=10, sticky="E")
-
-boton_limpiar = ttk.Button(frame_principal, text="Limpiar Campos", command=limpiar_campos, bootstyle=SECONDARY)
-boton_limpiar.grid(row=5, column=1, pady=10, sticky="W")
+ttk.Button(frame_principal, text="Iniciar Simulación", bootstyle=SUCCESS, command=iniciar_simulacion).grid(row=5, column=0, columnspan=1, pady=10)
+ttk.Button(frame_principal, text="Limpiar", bootstyle=WARNING, command=limpiar_campos).grid(row=5, column=1, columnspan=1, pady=10)
 
 ventana.mainloop()
