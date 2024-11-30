@@ -3,92 +3,112 @@ from tkinter import ttk
 from tkinter import messagebox
 
 # Función que representa la ecuación a resolver
-def calcular_ecuacion(i, V0, A, n, Vf):
-    """
-    Calcula el valor de la función financiera con base en la tasa de interés (i)
-    y los parámetros ingresados.
-    """
+def f(i, V0, A, n, Vf):
     return V0 * (1 + i)**n + A * ((1 + i)**n - (1 + i)) / i - Vf
 
 # Método de la secante
-def metodo_secante(V0, A, n, Vf, interes_inicial_1, interes_inicial_2, tol=1e-10, max_iter=100):
-    """
-    Resuelve una ecuación no lineal mediante el método de la secante.
-    """
+def metodo_secante(V0, A, n, Vf, i0, i1, tol=1e-10, max_iter=100):
     iteraciones = 0
     while iteraciones < max_iter:
-        f_i0 = calcular_ecuacion(interes_inicial_1, V0, A, n, Vf)
-        f_i1 = calcular_ecuacion(interes_inicial_2, V0, A, n, Vf)
+        # Calculamos los valores de la función en i0 y i1
+        f_i0 = f(i0, V0, A, n, Vf)
+        f_i1 = f(i1, V0, A, n, Vf)
 
+        # Comprobamos si la diferencia entre las funciones es pequeña para evitar división por 0
         if abs(f_i1 - f_i0) < tol:
-            return None  # Evitar división por cero
+            return None
 
-        nuevo_interes = interes_inicial_2 - f_i1 * (interes_inicial_2 - interes_inicial_1) / (f_i1 - f_i0)
+        # Calculamos el nuevo valor de i usando la fórmula del método de la secante
+        i_next = i1 - f_i1 * (i1 - i0) / (f_i1 - f_i0)
 
-        if abs(nuevo_interes - interes_inicial_2) < tol:
-            return nuevo_interes  # Converge
+        # Comprobamos si la diferencia entre i_next y i1 es suficientemente pequeña
+        if abs(i_next - i1) < tol:
+            return i_next
 
-        interes_inicial_1, interes_inicial_2 = interes_inicial_2, nuevo_interes
+        # Actualizamos i0 e i1 para la siguiente iteración
+        i0, i1 = i1, i_next
         iteraciones += 1
 
     return None
 
-# Ajustar frecuencia de aportes
-def ajustar_frecuencia(frecuencia, n, A):
-    """
-    Ajusta el número de periodos y el aporte periódico según la frecuencia seleccionada.
-    """
-    if frecuencia == 'Mensual':
-        n, A = n * 4, A * 4
-    elif frecuencia == 'Bimestral':
-        n, A = n * 2, A * 2
-    elif frecuencia == 'Trimestral':
-        n, A = n * 4 / 3, A * 4 / 3
-    return int(n), A
-
-# Inicia la simulación
+# Función que se ejecuta cuando el usuario presiona el botón
 def iniciar_simulacion():
     try:
+        # Obtenemos los valores introducidos por el usuario
         V0 = float(entry_V0.get())
         A = float(entry_A.get())
         n = int(entry_n.get())
         Vf = float(entry_Vf.get())
         frecuencia = combo_frecuencia.get()
 
-        i0, i1 = 0.05, 0.08
+        # Inicializamos los valores para el método de la secante
+        i0 = 0.05  # Valor inicial 1
+        i1 = 0.08  # Valor inicial 2
+
+        # Calculamos la tasa de interés usando el método de la secante
         i_calculado = metodo_secante(V0, A, n, Vf, i0, i1)
 
         if i_calculado is None:
             messagebox.showerror("Error", "No se pudo encontrar la tasa de interés. Intenta con otros valores iniciales.")
             return
 
-        n, A = ajustar_frecuencia(frecuencia, n, A)
+        # Ajuste de la cantidad de periodos dependiendo de la frecuencia de los aportes
+        if frecuencia == 'Mensual':
+            n = n * 4  # Suponemos que la cantidad de periodos es en meses, multiplicamos por 4 (para semanales)
+            A = A * 4  # Convertir aportes semanales a mensuales
+        elif frecuencia == 'Bimestral':
+            n = n * 2  # Convertir de semanas a bimestres
+            A = A * 2  # Convertir aportes semanales a bimestrales
+        elif frecuencia == 'Trimestral':
+            n = n * 4 / 3  # Convertir de semanas a trimestres
+            A = A * 4 / 3  # Convertir aportes semanales a trimestrales
 
-        # Cálculo de resultados
-        capital = V0
+        # Calcular los resultados para cada periodo
+        capital = V0  # Capital inicial (se mantiene igual)
         historial = []
         for t in range(1, n + 1):
+            # Calculamos la ganancia en base al capital y la tasa de interés
             ganancia = capital * i_calculado
-            total = capital + ganancia
-            aporte = A if t > 1 else 0
-            capital = total + aporte
-            historial.append((t, aporte, round(capital - ganancia, 2), round(ganancia, 2), round(capital, 2)))
+            total = capital + ganancia  # El total es capital + ganancia
 
+            # Sumar el aporte al total, y usar el total como el nuevo capital para el siguiente periodo
+            if t > 1:  # A partir del segundo periodo, sumamos el aporte
+                capital = total + A
+                aporte = A
+            else:
+                capital = total
+                aporte = 0  # El aporte es 0 en la primera iteración
+
+            # Guardamos los resultados en el historial
+            historial.append((t, aporte, round(capital - ganancia , 2), round(ganancia, 2), round(capital, 2)))
         Interes = float(i_calculado) * n
-        label_resultado.config(text=f"Tasa de interés calculada: {Interes * 100:.6f} %")
+        # Mostrar la tasa de interés calculada
+        label_resultado.config(text=f"Tasa de interés calculada: {Interes:.6f}")
+        # Mostrar el historial en una nueva ventana
         mostrar_historial(historial)
 
     except ValueError:
         messagebox.showerror("Error", "Por favor, ingresa valores válidos.")
 
+# Función para limpiar los valores introducidos
+def limpiar_valores():
+    # Limpiar todos los campos de entrada
+    entry_V0.delete(0, tk.END)
+    entry_A.delete(0, tk.END)
+    entry_n.delete(0, tk.END)
+    entry_Vf.delete(0, tk.END)
+    # Restablecer el valor predeterminado del combobox
+    combo_frecuencia.set("Semanal")
+    # Borrar el texto del resultado
+    label_resultado.config(text="Tasa de interés calculada: ")
+
 # Función para mostrar el historial en una nueva ventana
 def mostrar_historial(historial):
-    """
-    Crea una ventana emergente para mostrar el historial de resultados en formato tabular.
-    """
+    # Crear una nueva ventana
     ventana_historial = tk.Toplevel(root)
     ventana_historial.title("Historial de Resultados")
 
+    # Crear la tabla para mostrar los resultados en la nueva ventana
     tree = ttk.Treeview(ventana_historial, columns=("Periodo", "Aporte", "Capital", "Ganancia", "Total"), show="headings")
     tree.heading("Periodo", text="Periodo")
     tree.heading("Aporte", text="Aporte")
@@ -97,17 +117,19 @@ def mostrar_historial(historial):
     tree.heading("Total", text="Total")
     tree.grid(row=0, column=0, pady=10, padx=10)
 
+    # Insertar los resultados en la tabla
     for row in historial:
         tree.insert("", "end", values=row)
 
+    # Agregar un scrollbar a la ventana de historial
     scrollbar = ttk.Scrollbar(ventana_historial, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=scrollbar.set)
     scrollbar.grid(row=0, column=1, sticky='ns', padx=5, pady=10)
 
     center_window(ventana_historial)
 
-# Centra una ventana en la pantalla
 def center_window(window):
+    """ Centra una ventana en la pantalla. """
     window.update_idletasks()
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
@@ -120,7 +142,6 @@ def center_window(window):
 # Crear la ventana principal
 root = tk.Tk()
 root.title("Simulación de Interés")
-
 center_window(root)
 
 # Crear un marco principal
@@ -151,12 +172,12 @@ combo_frecuencia = ttk.Combobox(frame_principal, values=["Semanal", "Mensual", "
 combo_frecuencia.set("Semanal")  # Valor predeterminado
 combo_frecuencia.grid(row=4, column=1, pady=5)
 
-# Botón para iniciar la simulación
-ttk.Button(frame_principal, text="Iniciar Simulación", command=iniciar_simulacion).grid(row=5, column=0, columnspan=2, pady=10)
+# Botones en la interfaz
+ttk.Button(frame_principal, text="Iniciar Simulación", command=iniciar_simulacion).grid(row=5, column=0, pady=10, padx=5)
+ttk.Button(frame_principal, text="Limpiar Valores", command=limpiar_valores).grid(row=5, column=1, pady=10, padx=5)
 
 # Etiqueta para mostrar el resultado
-label_resultado = ttk.Label(frame_principal, text="Tasa de interés calculada: ")
-label_resultado.grid(row=6, column=0, columnspan=2, pady=5)
+label_resultado = ttk.Label(frame_principal, text="Tasa de interés calculada: ", font=bold_font)
+label_resultado.grid(row=6, column=0, columnspan=2, pady=10)
 
-# Iniciar la aplicación
 root.mainloop()
